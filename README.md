@@ -32,7 +32,7 @@ disco whoami
 
 ### 2. The **list** command
 
--This command helps user to list all the jobs he/she ever submitted to disco.
+-This command helps user to list all the jobs.
 
 ```
 disco list
