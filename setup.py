@@ -4,6 +4,8 @@ from discolib.__init__ import __version__
 setup(
     name = 'disco-cli',
     version = __version__,
+    author='Ayush Prakash',
+    author_email='ayush.prakash@hyperverge.co',
     packages = ['discolib'],
     install_requires = [
         'click==8.0.1',
