@@ -1,10 +1,12 @@
-_disco-cli v0.0.1_
+# disco-cli v0.0.1
 
 ### To install **disco-cli**, run:
 
 ```
 pip install git+https://github.com/grayatom/disco-CLI.git
 ```
+
+---
 
 Disco CLI provide the following commands :
 
@@ -13,6 +15,8 @@ Disco CLI provide the following commands :
 3. describe
 4. status
 5. log
+
+---
 
 ### 1. The **whoami** command
 
@@ -23,6 +27,8 @@ disco whoami
 ```
 
 ![whoami](./static/whoami.png)
+
+---
 
 ### 2. The **list** command
 
@@ -39,7 +45,7 @@ disco list
 disco list --filter name=testjob1
 ```
 
-_the accepted format is **--filter key=value**_
+_the valid format is **--filter key=value**_
 
 ![filter_one](./static/filter_one.png)
 
@@ -60,3 +66,45 @@ disco list --attributes name,status,scheduled_on
 _the valid format is **--attributes attr1,attr2,attr3,attr4** (comma separated without any space)_
 
 ![attribute](./static/attr.png)
+
+-If the users want to see their jobs in JSON format instead of tabular format they can use the `--json` flag
+
+```
+disco list --attributes name,status --filter name=testjob1 --json
+```
+
+![json_format](./static/json_format.png)
+
+---
+
+### 3. The **describe** command
+
+-This command help users to get all the details of a job.
+
+-This command takes a **required argument** `job_id`
+
+```
+disco describe 55571a7dd63e41b5a63528d04350bca6
+```
+
+![describe](./static/describe.png)
+
+---
+
+### 4. The **status** command
+
+-This command prints the timeline of a job.
+
+-This command takes a **required argument** `job_id`
+
+```
+disco status 55571a7dd63e41b5a63528d04350bca6
+```
+
+![status](./static/status.png)
+
+---
+
+### 5. The **log** command
+
+---
