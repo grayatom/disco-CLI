@@ -13,7 +13,6 @@ setup(
         'boto3==1.18.5', 
         'prettytable==2.1.0',
         'websockets==9.1',
-        'tzlocal==2.1'
     ],
     entry_points = '''
         [console_scripts]

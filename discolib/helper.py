@@ -1,8 +1,6 @@
 from prettytable import PrettyTable
-import pytz
 import websockets 
 import datetime
-import tzlocal
 from .Map import MAP
 
 
@@ -11,19 +9,31 @@ def get_pretty_dt_time(date_time_str):
         utc_dt_time_obj = datetime.datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S.%f')
         utc_now = datetime.datetime.utcnow()
         diff = utc_now - utc_dt_time_obj
+
+        days = diff.days
+
+        weeks, _days = divmod(days, 7)
+
+        if weeks > 0:
+            if _days == 0:
+                return f'{weeks}w ago'.ljust(14)
+            return f'{weeks}w {_days}d ago'.ljust(14)
+
         seconds = diff.total_seconds()
-        hours = int(divmod(seconds, 3600)[0])
-        if hours < 24:
+        hours = int(seconds / 3600)
+
+        if days > 0:
+            _hours = hours - 24 * days
+            if _hours == 0:
+                return f'{days}d ago'.ljust(14)
+            return f'{days}d {_hours}hr ago'.ljust(14)
+
+        else:
             minutes = int(divmod(seconds, 60)[0] % 60)
             if hours == 0:
                 return f'{minutes}min ago'.ljust(14)
             else:
                 return f'{hours}hr {minutes}min ago'.ljust(14)
-        else:
-            local_timezone = tzlocal.get_localzone()
-            local_dt_time_obj = utc_dt_time_obj.replace(tzinfo=pytz.utc).astimezone(local_timezone)
-            prettified_dt_time = datetime.datetime.strftime(local_dt_time_obj, '%b %d,%I:%M%p')
-            return prettified_dt_time
 
 
 def get_val(job, col):
@@ -63,7 +73,8 @@ def generate_table(jobs, attrs):
             if item != 'id':
                 cols.append(item)
     cols.sort(key=lambda item: MAP[item]['rank'])
-    table.field_names = cols
+    COLS = list(map(lambda item: item.upper(), cols))
+    table.field_names = COLS
     for job in jobs:
         row = get_table_row(job, cols)
         table.add_row(row)
@@ -72,7 +83,8 @@ def generate_table(jobs, attrs):
 
 def print_timeline(job):
     cols = ['submitted', 'scheduled', 'started', 'exited', 'scheduled_on', 'exit_code']
-    timestamps = get_table_row(job, cols)
+    info = get_table_row(job, cols)
+    *timestamps, scheduled_on, exit_code = info
 
     if timestamps[1] == '--':
         print(f'''
@@ -88,10 +100,9 @@ def print_timeline(job):
     O----------------------O--------------(waiting)
     |                      |                                                           
     |                      |                                          
-    Submitted              Scheduled                              
+    Submitted              Scheduled                          
     {timestamps[0]}         {timestamps[1]}                 
-    
-    Scheduled On : {timestamps[4]}
+                           (on {scheduled_on})
     ''')
 
     elif timestamps[3] == '--':
@@ -101,8 +112,7 @@ def print_timeline(job):
     |                      |                      |                      
     Submitted              Scheduled              Started              
     {timestamps[0]}         {timestamps[1]}         {timestamps[1]}        
-    
-    Scheduled On : {timestamps[4]}
+                           (on {scheduled_on})
     ''')
 
     else:
@@ -110,14 +120,11 @@ def print_timeline(job):
     O----------------------O----------------------O----------------------O----------------------O
     |                      |                      |                      |                      Done
     |                      |                      |                      |
-    Submitted              Scheduled              Started                Exited
+    Submitted              Scheduled              Started                Exited ({exit_code})
     {timestamps[0]}         {timestamps[1]}         {timestamps[2]}         {timestamps[3]}        
-    
-    Scheduled On : {timestamps[4]}
-    Exit Code : {timestamps[5]}
+                           (on {scheduled_on})
     ''')
 
-    
 
 async def viewlog(job_id, tail):
     try:
